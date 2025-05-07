@@ -14,11 +14,13 @@ BASENUM getValue(){
     BASENUM num;
     num.length=0;
     char c;
+    printf("You may now enter a number you want to convert.\nPreferably without any prefix.\n");
     while((c = getchar())!='\n'){
         num.length++;
-        num.value = realloc(num.value, sizeof(num)*num.length);
+        num.value = realloc(num.value, sizeof(char)*num.length);
         num.value[num.length-1] = c;
     }
+    num.value[num.length] = '\0';
     return num;
 }
 // 'u' = unknown, 'x' = hexadecimal, 'd' = decimal, 'b' = binary, 'o' = octal
@@ -66,11 +68,43 @@ void autoDetect(BASENUM *num){
     printf("selected type: %c\n", (*num).type);
 }
 
+int power(int base, int exp) {
+    int result = 1;
+    while (exp > 0) {
+        result *= base;
+        exp--;
+    }
+    return result;
+}
+
+//int to str
+char* iota(int num, int length){
+    char* result = NULL;
+    result = realloc(result, length);
+    for(int i=0;i<length;i++){
+        result[i] = '0'+((num/power(10, length-1-i))%10);
+    }
+    result[length] = '\0';
+    return result;
+}
 
 BASENUM convertBD(BASENUM num){
     BASENUM result;
     result.type = 'd';
+    result.length = 0;
+    int temp = 0;
 
+    for(int i=num.length-1; i>(-1); i--){
+       if((num.value[i])=='1'){
+           temp+=power(2, result.length);
+           printf("%d. %c = %d\n", i, num.value[i], temp);
+
+       }
+       result.length++;
+    }
+    result.value = iota(temp, result.length);
+    //printf("%d\n",temp);
+    //printf("%ld",sizeof(result.value));
     return result;
 }
 
@@ -171,6 +205,7 @@ BASENUM convert(BASENUM num, char type){
         case 'd':
             switch (num.type) {
                 case 'b':
+                    printf("BD\n");
                     return convertBD(num);
                 case 'd':
                     printf("%s is already decimal\n", num.value);
@@ -216,14 +251,13 @@ BASENUM convert(BASENUM num, char type){
 
 // asks user what base do we convert our string to
 char convertto(){
+    char c;
     printf("What to convert to?");
-    char c = getchar();
-    while (!(c=='\n' || (c == 'x' || c == 'o' || c == 'd' || c == 'b'))){
+
+    c = getchar();
+    while(!(c == 'x' || c == 'o' || c == 'd' || c == 'b')){
         printf("Invalid input, (x; b; d; o;)\nWhat to convert to?\n");
-
-        while (getchar() != '\n');
         c = getchar();
-
     }
     return c;
 }
@@ -232,6 +266,6 @@ int main(){
     BASENUM num = getValue();
     autoDetect(&num);
     BASENUM result = convert(num, convertto());
-    printf("%c\n", num.type);
+    printf("RESULT: %s\n", result.value);
     return 0;
 }
