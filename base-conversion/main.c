@@ -12,7 +12,8 @@ typedef struct{
 
 BASENUM getValue(){
     BASENUM num;
-    num.length=0;
+    num.length = 0;
+    num.value = NULL;
     char c;
     printf("You may now enter a number you want to convert.\nPreferably without any prefix.\n");
     while((c = getchar())!='\n'){
@@ -78,7 +79,7 @@ int power(int base, int exp) {
 }
 
 //int to str
-char* iota(int num, int length){
+char* iota(long num, int length){
     char* result = NULL;
     result = realloc(result, length);
     for(int i=0;i<length;i++){
@@ -92,26 +93,49 @@ BASENUM convertBD(BASENUM num){
     BASENUM result;
     result.type = 'd';
     result.length = 0;
-    int temp = 0;
+    long temp = 0;
 
-    for(int i=num.length-1; i>(-1); i--){
+    for(long i=num.length-1; i>(-1); i--){
        if((num.value[i])=='1'){
            temp+=power(2, result.length);
-           printf("%d. %c = %d\n", i, num.value[i], temp);
+           printf("%ld. %c = %ld\n", i, num.value[i], temp);
 
        }
        result.length++;
     }
     result.value = iota(temp, result.length);
-    //printf("%d\n",temp);
-    //printf("%ld",sizeof(result.value));
+
     return result;
 }
 
 BASENUM convertBX(BASENUM num){
     BASENUM result;
+    BASENUM dec_num = convertBD(num);
     result.type = 'x';
-
+    result.length = 0;
+    result.value = NULL;
+    char* temp = NULL;
+    char* endptr;
+    long dec = strtol(num.value, &endptr, 10);
+    while(dec > 0){
+        result.length++;
+        temp = realloc(temp, result.length);
+        int digit = dec % 16;
+        if (digit<10){
+            digit = '0'+digit;
+            temp[result.length-1] = digit;
+            dec = dec/16;
+            continue;
+        }
+        digit = 55+digit;
+        temp[result.length-1] = digit;
+        dec = dec/16;
+    }
+    result.value = realloc(result.value, result.length);
+    for (int i = 0; i < result.length; i++) {
+        result.value[i] = temp[result.length - i - 1];
+    }
+    result.value[result.length] = '\0';
     return result;
 }
 
@@ -266,6 +290,6 @@ int main(){
     BASENUM num = getValue();
     autoDetect(&num);
     BASENUM result = convert(num, convertto());
-    printf("RESULT: %s\n", result.value);
+    printf("RESULT: %s\n", (result.value));
     return 0;
 }
