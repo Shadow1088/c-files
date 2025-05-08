@@ -149,7 +149,23 @@ BASENUM convertBO(BASENUM num){
 BASENUM convertDB(BASENUM num){
     BASENUM result;
     result.type = 'b';
-
+    result.length = 0;
+    result.value = NULL;
+    char* temp = NULL;
+    char* endptr;
+    long dec = strtol(num.value, &endptr, 10);
+    while(dec>0){
+        result.length++;
+        temp = realloc(temp, result.length);
+        char digit = dec%2;
+        dec = dec/2;
+        temp[result.length-1] = digit + '0';
+    }
+    result.value = realloc(result.value, result.length);
+    for (int i = 0; i < result.length; i++) {
+        result.value[i] = temp[result.length - i - 1];
+    }
+    result.value[result.length] = '\0';
     return result;
 }
 
@@ -274,16 +290,21 @@ BASENUM convert(BASENUM num, char type){
 }
 
 // asks user what base do we convert our string to
-char convertto(){
+char convertto() {
     char c;
-    printf("What to convert to?");
 
-    c = getchar();
-    while(!(c == 'x' || c == 'o' || c == 'd' || c == 'b')){
-        printf("Invalid input, (x; b; d; o;)\nWhat to convert to?\n");
+    while (getchar() != '\n');
+    while (1) {
+        printf("What to convert to? (x, b, d, o): ");
         c = getchar();
+
+        while (getchar() != '\n');
+
+        if (c == 'x' || c == 'b' || c == 'd' || c == 'o') {
+            return c;
+        }
+        printf("Invalid input. Please enter one of: x, b, d, o.\n");
     }
-    return c;
 }
 
 int main(){
